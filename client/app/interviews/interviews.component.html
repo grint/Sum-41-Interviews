@@ -1,0 +1,138 @@
+
+<app-loading [condition]="isLoading"></app-loading>
+<app-toast [message]="toast.message"></app-toast>
+<div class="card" *ngIf="!isLoading">
+  <h4 class="card-header">Current interviews ({{interviews.length}})</h4>
+  <div class="card-block">
+    <ul class="list-group interviews-list" *ngIf="!isEditing">
+      <li class="list-group-item" *ngIf="interviews.length === 0">There are no interviews in the DB. Add a new interview below.</li>
+      <ng-template ngFor let-interview [ngForOf]="interviews">
+        <li class="list-group-item justify-content-end" *ngIf="interview.isActive || (auth.loggedIn &amp;&amp; auth.isAdmin)"><span class="interview-title mr-auto"><span class="interview-title" [ngClass]="{'text-gray': !interview.isActive}">{{interview.title != '' ? interview.title : interview.sourceUrl}} </span><a href="{{interview.sourceUrl}}" title="Open the source in a new window"><i class="fa fa-external-link"></i></a></span><span class="interview-icons"><i class="fa fa-video-camera" *ngIf="interview.isVideo"></i><i class="fa fa-volume-up" *ngIf="interview.isAudio"></i><a (click)="gotoDetail(interview)" *ngIf="interview.textOriginal"><span class="lang lang-{{interview.sourceLang}}">{{interview.sourceLang | uppercase}}</span></a><a (click)="gotoDetail(interview)" *ngIf="interview.textRu"><span class="lang lang-ru">RU</span></a></span><span class="interview-actions" *ngIf="auth.loggedIn &amp;&amp; auth.isAdmin"><span class="badge badge-default badge-pill" title="Edit" (click)="enableEditing(interview)"><i class="fa fa-pencil"></i></span><span class="badgef badge-danger badge-pill" title="Delete" (click)="deleteInterview(interview)"><i class="fa fa-trash"></i></span></span></li>
+      </ng-template>
+    </ul>
+    <div class="edit-interview" *ngIf="isEditing">
+      <form #form="ngForm" (ngSubmit)="editInterview(interview)" novalidate>
+        <div class="form-group row">
+          <label class="col-form-label col-12 col-md-4 col-lg-2" for="sourceUrl">Source URL</label>
+          <div class="col-12 col-md-8 col-lg-10">
+            <input class="form-control" name="sourceUrl" type="text" [(ngModel)]="interview.sourceUrl" placeholder="Source URL" required minlength="10" #sourceUrl="ngModel">
+            <div class="alert alert-danger" [hidden]="sourceUrl.valid || sourceUrl.pristine">Source URL is required and minimal length should be 10
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label class="col-form-label col-12 col-md-4 col-lg-2" for="title">Title</label>
+          <div class="col-12 col-md-8 col-lg-10">
+            <input class="form-control" name="title" type="text" [(ngModel)]="interview.title" placeholder="Title">
+          </div>
+        </div>
+        <div class="row">
+          <label class="col-12 col-md-4 col-lg-2 col-form-label" for="sourceLang">Source language</label>
+          <div class="col-12 col-md-8 col-lg-6">
+            <div class="form-group">
+              <select class="form-control" name="sourceLang" [(ngModel)]="interview.sourceLang">
+                <option value="en">English</option>
+                <option value="de">German</option>
+                <option value="ru">Russian</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-12 col-md-8 offset-md-4 offset-lg-0 col-lg-4">
+            <div class="form-group">
+              <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                  <input class="form-check-input" name="isVideo" type="checkbox" value="{{interview.isVideo}}" [(ngModel)]="interview.isVideo"> Video
+                </label>
+              </div>
+              <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                  <input class="form-check-input" name="isAudio" type="checkbox" value="{{interview.isAudio}}" [(ngModel)]="interview.isAudio"> Audio
+                </label>
+              </div>
+              <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                  <input class="form-check-input" name="isActive" type="checkbox" value="{{interview.isActive}}" [(ngModel)]="interview.isActive"> Enabled
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="textOriginal">Original text</label>
+          <textarea class="form-control" name="textOriginal" [(ngModel)]="interview.textOriginal" placeholder="Paste original text here"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="textRu">Russian translation</label>
+          <textarea class="form-control" name="textRu" [(ngModel)]="interview.textRu" placeholder="Paste russian translation here"></textarea>
+        </div>
+        <div class="form-group text-center">
+          <button class="btn btn-primary" type="submit" [disabled]="!form.form.valid"><i class="fa fa-floppy-o"></i> Save</button>
+          <button class="btn btn-secondary" (click)="cancelEditing()"><i class="fa fa-times"></i> Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="card" *ngIf="!isEditing">
+  <h4 class="card-header">Add new interview</h4>
+  <div class="card-block">
+    <form [formGroup]="addInterviewForm" (ngSubmit)="addInterview()" novalidate>
+      <div class="form-group row">
+        <label class="col-form-label col-12 col-md-4 col-lg-2" for="sourceUrl">Source URL</label>
+        <div class="col-12 col-md-8 col-lg-10">
+          <input class="form-control" name="sourceUrl" type="text" formControlName="sourceUrl" placeholder="Source URL" required minlength="10">
+          <div class="alert alert-danger" [hidden]="sourceUrl.valid || sourceUrl.pristine">Source URL is required and minimal length should be 10
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-form-label col-12 col-md-4 col-lg-2" for="title">Title</label>
+        <div class="col-12 col-md-8 col-lg-10">
+          <input class="form-control" name="title" type="text" formControlName="title" placeholder="Title">
+        </div>
+      </div>
+      <div class="row">
+        <label class="col-12 col-md-4 col-lg-2 col-form-label" for="sourceLang">Source language</label>
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="form-group">
+            <select class="form-control" name="sourceLang" formControlName="sourceLang">
+              <option value="en">English</option>
+              <option value="de">German</option>
+              <option value="ru">Russian		</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-12 col-md-8 offset-md-4 offset-lg-0 col-lg-4">
+          <div class="form-group">
+            <div class="form-check form-check-inline">
+              <label class="form-check-label">
+                <input class="form-check-input" name="isVideo" type="checkbox" value="{{interview.isVideo}}" formControlName="isVideo"> Video
+              </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label class="form-check-label">
+                <input class="form-check-input" name="isAudio" type="checkbox" value="{{interview.isAudio}}" formControlName="isAudio"> Audio
+              </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label class="form-check-label">
+                <input class="form-check-input" name="isActive" type="checkbox" value="{{interview.isActive}}" formControlName="isActive"> Enabled
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="textOriginal">Original text</label>
+        <textarea class="form-control" name="textOriginal" formControlName="textOriginal" placeholder="Paste original text here"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="textRu">Russian translation</label>
+        <textarea class="form-control" name="textRu" formControlName="textRu" placeholder="Paste russian translation here"></textarea>
+      </div>
+      <div class="form-group text-center">
+        <button class="btn btn-primary" type="submit" [disabled]="!addInterviewForm.valid"><i class="fa fa-floppy-o"></i> Add</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,88 @@
+mixin field(type, slug, label, placeholder, model, formType, validationRules, columns)
+	-var attributes = {};
+	-var labelClass = ''
+	-var fieldClass = ''
+	
+	if validationRules
+		-attributes = validationRules;
+
+	if columns
+		-var labelClass = (columns[0] ? 'col-'+columns[0] : '') + (columns[1] ? ' col-sm-'+columns[1] : '') + (columns[2] ? ' col-md-'+columns[2] : '') + (columns[3] ? ' col-lg-'+columns[3] : '') + (columns[4] ? ' col-xl-'+columns[4] : '') 
+
+		-var fieldClass = (columns[0] ? 'col-'+(columns[0] == 12 ? 12 : 12-columns[0]) : '') + (columns[1] ? ' col-sm-'+(12-columns[1]) : '') + (columns[2] ? ' col-md-'+(12-columns[2]) : '') + (columns[3] ? ' col-lg-'+(12-columns[3]) : '') + (columns[4] ? ' col-xl-'+(12-columns[4]) : '') 
+
+	.form-group(class= columns ? 'row' : '')
+		if label
+			label(for=slug, class= (columns ? 'col-form-label ' : '') + labelClass) #{label}
+		if columns
+			div(class=fieldClass)
+				if formType == 'templateDriven'
+					+fieldTemplateDrivenForm(type, slug, label, placeholder, model, validationRules)
+				else
+					+fieldReactiveForm(type, slug, label, placeholder, model, validationRules)
+		else
+			if formType == 'templateDriven'
+				+fieldTemplateDrivenForm(type, slug, label, placeholder, model, validationRules)
+			else
+				+fieldReactiveForm(type, slug, label, placeholder, model, validationRules)
+
+
+
+
+mixin fieldTemplateDrivenForm(type, slug, label, placeholder, model, validationRules)
+	-var ngModelSlug = "#"+slug
+	-var attributes = {};
+	if validationRules
+		-attributes = validationRules
+		-attributes[ngModelSlug] = "ngModel"
+	
+	if type == 'textarea'
+		textarea.form-control(name=slug, '[(ngModel)]'=model, placeholder=placeholder)&attributes(attributes)
+	else
+		input.form-control(name=slug, type=type, '[(ngModel)]'=model, placeholder=placeholder)&attributes(attributes)
+	if validationRules
+		+validationAlert(label, slug, validationRules)
+
+
+
+
+mixin fieldReactiveForm(type, slug, label, placeholder, model, validationRules)
+	-var attributes = {};
+	if validationRules
+		-attributes = validationRules
+	
+	if type == 'textarea'
+		textarea.form-control(name=slug, formControlName=slug, placeholder=placeholder)&attributes(attributes)
+	else
+		input.form-control(name=slug, type=type, formControlName=slug, placeholder=placeholder)&attributes(attributes)
+	if validationRules
+		+validationAlert(label, slug, validationRules)
+
+
+
+
+
+mixin validationAlert(label, slug, validationRules)
+	.alert.alert-danger([hidden]=slug+".valid || "+slug+".pristine")
+		if validationRules.required && validationRules.minlength
+			| #{label} is required and minimal length should be #{validationRules.minlength}
+		else if validationRules.required
+			| #{label} is required
+		else if validationRules.minlength
+			| Minimal length should be #{validationRules.minlength}
+
+
+
+mixin checkboxInput(name, title, value, model, formType, validationRules, isInline)
+	-var ngModelSlug = "#"+model
+	-var attributes = {};
+	if validationRules
+		-attributes[ngModelSlug] = "ngModel"
+	.form-check(class = isInline ? 'form-check-inline' : '')
+		label.form-check-label
+			if formType == 'reactive'
+				input.form-check-input(name=name, type='checkbox', value=value, formControlName=name)&attributes(attributes)
+			else
+				input.form-check-input(name=name, type='checkbox', value=value, '[(ngModel)]'=model)
+			|  #{title}
+

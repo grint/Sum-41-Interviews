@@ -1,0 +1,46 @@
+mixin addEditInterviewForm(formAction)
+	if formAction == "Edit"
+		-var formType = "templateDriven"
+	else if formAction == "Add"
+		-var formType = "reactive"
+
+	+field('text', 'sourceUrl', 'Source URL', 'Source URL', 'interview.sourceUrl', formType, {required: true, minlength: 10}, [12,null,4,2])
+	+field('text', 'title', 'Title', 'Title', 'interview.title', formType, false, [12,null,4,2])
+
+	.row
+		label.col-12.col-md-4.col-lg-2.col-form-label(for='sourceLang') Source language
+		.col-12.col-md-8.col-lg-6
+			.form-group
+				if formType == "templateDriven"
+					select.form-control(name='sourceLang', '[(ngModel)]'='interview.sourceLang')
+						option(value='en') English
+						option(value='de') German
+						option(value='ru') Russian
+				else
+					select.form-control(name='sourceLang', formControlName="sourceLang")
+						option(value='en') English
+						option(value='de') German
+						option(value='ru') Russian		
+
+		.col-12.col-md-8.offset-md-4.offset-lg-0.col-lg-4
+			.form-group
+				+checkboxInput('isVideo', 'Video', '{{interview.isVideo}}', 'interview.isVideo', formType, false, true)
+				+checkboxInput('isAudio', 'Audio', '{{interview.isAudio}}', 'interview.isAudio', formType, false, true)
+				+checkboxInput('isActive', 'Enabled', '{{interview.isActive}}', 'interview.isActive', formType, false, true)
+
+	+field('textarea', 'textOriginal', 'Original text', 'Paste original text here', 'interview.textOriginal', formType, false)
+	+field('textarea', 'textRu', 'Russian translation', 'Paste russian translation here', 'interview.textRu', formType, false)
+
+	if formAction == "Edit"
+		.form-group.text-center
+			button.btn.btn-primary(type='submit', '[disabled]'='!form.form.valid')
+				i.fa.fa-floppy-o
+				|  Save
+			button.btn.btn-secondary('(click)'='cancelEditing()')
+				i.fa.fa-times
+				|  Cancel
+	else if formAction == "Add"
+		.form-group.text-center
+			button.btn.btn-primary(type='submit', '[disabled]'='!addInterviewForm.valid')
+				i.fa.fa-floppy-o
+				|  Add

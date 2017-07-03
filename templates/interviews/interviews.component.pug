@@ -1,0 +1,53 @@
+include ../shared/forms
+include _interview.form.pug
+
+app-loading('[condition]'='isLoading')
+app-toast('[message]'='toast.message')
+
+
+//- <pre>{{interviews | json}}</pre>
+
+.card('*ngIf'="!isLoading")
+	h4.card-header Current interviews ({{interviews.length}})
+	.card-block
+		ul.list-group.interviews-list('*ngIf'="!isEditing")
+			li.list-group-item('*ngIf'="interviews.length === 0")
+				| There are no interviews in the DB. Add a new interview below.
+
+			//- li.list-group-item.justify-content-end('*ngFor'="let interview of interviews")
+			ng-template('ngFor' 'let-interview' '[ngForOf]'="interviews")
+				li.list-group-item.justify-content-end('*ngIf'="interview.isActive || (auth.loggedIn && auth.isAdmin)")
+					span.interview-title.mr-auto
+						span.interview-title('[ngClass]'="{'text-gray': !interview.isActive}") {{interview.title != '' ? interview.title : interview.sourceUrl}} 
+						
+						a(href='{{interview.sourceUrl}}', title='Open the source in a new window')
+							i.fa.fa-external-link
+					
+					span.interview-icons
+						i.fa.fa-video-camera('*ngIf'="interview.isVideo")
+						i.fa.fa-volume-up('*ngIf'="interview.isAudio")
+
+						//- a(href='/interview/{{interview._id}}', '*ngIf'="interview.textOriginal")
+						//- 	span.lang(class='lang-{{interview.sourceLang}}') {{interview.sourceLang | uppercase}}
+						a('(click)'="gotoDetail(interview)", '*ngIf'="interview.textOriginal")
+							span.lang(class='lang-{{interview.sourceLang}}') {{interview.sourceLang | uppercase}}
+						
+						a('(click)'="gotoDetail(interview)", '*ngIf'="interview.textRu")
+							span.lang.lang-ru RU
+					
+					span.interview-actions('*ngIf'="auth.loggedIn && auth.isAdmin")
+						span.badge.badge-default.badge-pill(title='Edit', '(click)'='enableEditing(interview)')
+							i.fa.fa-pencil
+						span.badgef.badge-danger.badge-pill(title='Delete', '(click)'='deleteInterview(interview)')
+							i.fa.fa-trash
+
+		.edit-interview('*ngIf'="isEditing")
+			form('#form'='ngForm', '(ngSubmit)'='editInterview(interview)', novalidate)
+				+addEditInterviewForm('Edit')
+
+
+.card('*ngIf'="!isEditing")
+	h4.card-header Add new interview
+	.card-block
+		form('[formGroup]'='addInterviewForm', '(ngSubmit)'='addInterview()', novalidate)
+			+addEditInterviewForm('Add')

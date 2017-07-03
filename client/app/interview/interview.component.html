@@ -1,0 +1,13 @@
+<div *ngIf="interview">
+  <h2>{{interview.title}} details!</h2>
+  <p>{{interview.sourceUrl}}</p>
+  <p>{{interview.interviewDate | date:'dd MMM yyyy'}}</p>
+
+  <div>{{interview.textOriginal}}</div>
+  <div>{{interview.textRu}}</div>
+  </div>
+
+<button (click)="goBack()">Back</button>
+<!-- <button (click)="save()">Save</button> -->
+
+<pre>{{interview | json}}</pre>
