@@ -1,7 +1,7 @@
 # Sum 41 Interviews
 MEAN web-service for collecting of interviews with the band.
 
-**Angular / Bootstrap / Font Awesome**  
+**Angular / Bootstrap 4 / Font Awesome**  
 Client side layer.
 
 **Express.js**  
@@ -11,6 +11,9 @@ http://expressjs.com
 **Elasticsearch**  
 Indexing and searching data in the database.  
 https://www.elastic.co
+
+**MongoDB**  
+NoSQL Database
 
 **Core JS**  
 https://github.com/zloirock/core-js
