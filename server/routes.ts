@@ -1,10 +1,8 @@
 import * as express from 'express';
 
-import CatCtrl from './controllers/cat';
 import UserCtrl from './controllers/user';
 import InterviewCtrl from './controllers/interview';
 
-import Cat from './models/cat';
 import User from './models/user';
 import Interview from './models/interview';
 
@@ -12,17 +10,8 @@ export default function setRoutes(app) {
 
   const router = express.Router();
 
-  const catCtrl = new CatCtrl();
   const userCtrl = new UserCtrl();
   const interviewCtrl = new InterviewCtrl();
-
-  // Cats
-  router.route('/cats').get(catCtrl.getAll);
-  router.route('/cats/count').get(catCtrl.count);
-  router.route('/cat').post(catCtrl.insert);
-  router.route('/cat/:id').get(catCtrl.get);
-  router.route('/cat/:id').put(catCtrl.update);
-  router.route('/cat/:id').delete(catCtrl.delete);
 
   // Users
   router.route('/login').post(userCtrl.login);
@@ -40,6 +29,12 @@ export default function setRoutes(app) {
   router.route('/interviews/:id').get(interviewCtrl.get);
   router.route('/interviews/:id').put(interviewCtrl.update);
   router.route('/interviews/:id').delete(interviewCtrl.delete);
+
+  // router.route('/search/:keyword').get(interviewCtrl.search);
+  // router.get(/^\/search\/([^\/]+?)\/?$/i, interviewCtrl.search);
+  // router.get(/^\/search\/(?:(\.+))\/?$/i, interviewCtrl.search);
+  router.get('/search/:keyword', interviewCtrl.search);
+  // router.route('/search/:keyword*').post(interviewCtrl.search);
 
   // Apply the routes to our application with the prefix /api
   app.use('/api', router);

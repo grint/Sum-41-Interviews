@@ -99,5 +99,6 @@ typings/
 # dotenv environment variables file
 .env
 
-# Database
+# Database & Search engine
 _mongodb/
+_elasticsearch/

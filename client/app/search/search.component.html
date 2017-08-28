@@ -1,0 +1,35 @@
+<p>
+  search works! {{searchResults.length}}
+</p>
+
+
+{{searchResults | json }}
+
+<ul class="list-group search-results-list">
+  <li class="list-group-item" *ngIf="searchResults.length === 0">There are no search results</li>
+
+  <ng-template ngFor let-result [ngForOf]="searchResults">
+    <li class="list-group-item">
+    	{{result.title}}
+    </li>
+  </ng-template>
+  
+</ul>
+
+
+<!-- <form #form="ngForm" (ngSubmit)="search(searchString)" novalidate>
+<div class="form-group row">
+  <label class="col-form-label col-12 col-md-4 col-lg-2" for="searchString">Search</label>
+  <div class="col-12 col-md-8 col-lg-10">
+    <input class="form-control" name="searchString" type="text" [(ngModel)]="searchString" placeholder="Source URL" required minlength="2" #searchString="ngModel">
+    <div class="alert alert-danger" [hidden]="searchString.valid || searchString.pristine">Search string minimal length should be 2
+    </div>
+  </div>
+</div>
+
+<div class="form-group text-center">
+  <button class="btn btn-primary" type="submit" [disabled]="!form.form.valid"><i class="fa fa-search"></i> Search</button>
+</div>
+</form> -->
+
+<button class="btn btn-primary" type="submit" (click)="search('test')"><i class="fa fa-search"></i> Search</button>

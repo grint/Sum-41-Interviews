@@ -10,6 +10,69 @@ abstract class BaseCtrl {
     });
   };
 
+  // Search entries
+  search = (req, res) => {
+    // res.json({
+    //     keyword: req.param('keyword'),
+    //     path: req.param(0)
+    // });
+    this.model.search({
+      // query_string: 
+
+        // {query: "*"+req.params.keyword+"*"}
+
+        // {
+        //     "default_field" : "title",
+        //     "query" : req.params.keyword
+        // },
+
+        // https://www.elastic.co/guide/en/elasticsearch/guide/current/multi-field-search.html
+        // match_phrase_prefix: {
+        //     "title" : {
+        //         "query" : req.params.keyword
+        //     }
+        // },
+
+        // multi_match: {
+        //   "query":    req.params.keyword+"*",
+        //   "fields": [ "title", "sourceUrl", "textOriginal", "textRu" ]
+        // },
+
+        query_string: {
+          "query":    req.params.keyword+"*",
+          "fields": [ "title", "sourceUrl", "textOriginal", "textRu" ]
+        },
+
+        // match: {
+        //     // title : req.params.keyword,
+        //     "title": {
+        //         "query":    req.params.keyword,
+        //         "analyzer": "standard" 
+        //     }
+        // }
+
+    }, 
+
+    function(err, results) {
+        if (err) { return console.error(err); }
+        console.log("---------------req.params---------------");
+        console.log(req.params);
+        console.log("---------------req.query---------------");
+        console.log(req.query);
+        console.log("---------------results---------------");
+        console.log(results);
+        console.log("------------------------------");
+        console.log(results.hits.hits);
+        console.log("------------------------------");
+        // res.send(results);
+        res.json(results.hits.hits);
+    });
+  };
+
+
+
+
+
   // Count all
   count = (req, res) => {
     this.model.count((err, count) => {
