@@ -99,6 +99,8 @@ typings/
 # dotenv environment variables file
 .env
 
-# Database & Search engine
+# Database & Search engine, portable Java & node
 _mongodb/
 _elasticsearch/
+_jdk1.8.0_144/
+_node/

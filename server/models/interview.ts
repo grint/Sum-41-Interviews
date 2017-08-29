@@ -2,7 +2,6 @@ import * as mongoose from 'mongoose';
 
 var mongoosastic = require("mongoosastic");
 
-
 const interviewSchema = new mongoose.Schema({
   sourceUrl: { type: String, default: "", required: true, es_indexed:true, es_analyzer: 'autocomplete' },
   title: { type: String, default: "", es_indexed:true, es_analyzer: 'autocomplete' },
@@ -15,8 +14,6 @@ const interviewSchema = new mongoose.Schema({
   isAudio: { type: Boolean, default: false },
   isActive: { type: Boolean, default: false }
 });
-//
-
 
 interviewSchema.plugin(mongoosastic, {  
   // hosts: ['localhost:9200'],
@@ -30,7 +27,7 @@ interviewSchema.plugin(mongoosastic, {
 
 const Interview = mongoose.model('Interview', interviewSchema);
 
-// Indexing An Existing Collection
+// Indexing an existing collections
 var stream = Interview.synchronize(), count = 0;
 stream.on('data', function(err, doc){
   count++;
@@ -42,41 +39,43 @@ stream.on('error', function(err){
   console.log(err);
 });
 
-//
+/** Indexing analysers
+ *
+ * References:
+ * https://www.elastic.co/guide/en/elasticsearch/guide/current/_index_time_search_as_you_type.html
+ *
+ * Filters:
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-edgengram-tokenfilter.html
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-asciifolding-tokenfilter.html
+ *
+ * Tokenizers:
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-standard-tokenizer.html
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-edgengram-tokenizer.html
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-whitespace-tokenizer.html
+ */
 Interview.createMapping({
   "settings": {
     "analysis": {
       "filter": {
         "autocomplete_filter": {
             "type":     "edge_ngram",
-            "min_gram": 1,
+            "min_gram": 2,
             "max_gram": 20
-        },
-        // "edgeNGram_filter": {
-        //    "type": "edgeNGram",
-        //    "min_gram": 2,
-        //    "max_gram": 20
-        // }
+        }
       },
       "analyzer": {
         "autocomplete": {
             "type":      "custom",
             "tokenizer": "standard",
+            //"tokenizer":"edge_ngram_tokenizer",
             "filter": [
                 "lowercase",
+                "asciifolding",
                 "autocomplete_filter" 
             ]
         },
-
-        // "edge_nGram_analyzer": {
-        //     "type":"custom",
-        //     "tokenizer":"edge_ngram_tokenizer",
-        //     "filter": [
-        //       "lowercase",
-        //       "asciifolding",
-        //       "edgeNGram_filter"
-        //     ]
-        // },
+        // The whitespace tokenizer breaks text into terms 
+        // whenever it encounters a whitespace character.
         // "whitespace_analyzer": {
         //     "type": "custom",
         //     "tokenizer": "whitespace",
@@ -86,24 +85,18 @@ Interview.createMapping({
         //    ]    
         // }
       },
+      // The edge_ngram tokenizer first breaks text down into words, 
+      // then it emits N-grams of each word
       // "tokenizer" : {
       //   "edge_ngram_tokenizer" : {
-      //     "type" : "edgeNGram",
+      //     "type" : "edge_ngram",
       //     "min_gram" : "2",
-      //     "max_gram" : "10",
+      //     "max_gram" : "8",
       //     "token_chars": [ "letter", "digit" ]
       //   }   
       // }
     }
   }
-  // "mappings": {
-  //   "interviews": {
-  //     "_all": {
-  //       "analyzer": "edge_nGram_analyzer", 
-  //       "search_analyzer": "edge_nGram_analyzer"
-  //     }
-  //   }
-  // }
 }, (err, mapping) => {
   if(err){
     console.log('error creating mapping (you can safely ignore this)');
@@ -114,7 +107,4 @@ Interview.createMapping({
   }
 });
 
-
-
 export default Interview;
-
